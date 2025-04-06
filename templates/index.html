@@ -34,7 +34,7 @@
 
     {% if obraz %}
         <h2>Wynik: {{ typ }} ({{ tonika }})</h2>
-        <img src="{{ url_for('static', filename=obraz.split('static/')[1]) }}" alt="Diagram akordu">
+        <img src="{{ url_for('static', filename=obraz.split('static/')[-1]) }}" alt="Diagram akordu">
     {% endif %}
 </body>
 </html>
