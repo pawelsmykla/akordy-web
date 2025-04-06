@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: akordy-septymowe
+    env: python
+    plan: free
+    buildCommand: ""
+    startCommand: python app.py
