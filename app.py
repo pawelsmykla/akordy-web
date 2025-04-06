@@ -13,6 +13,10 @@ def index():
         return render_template("index.html", tonika=tonika, typ=typ, obraz=output_path)
     return render_template("index.html")
 
+import os
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host="0.0.0.0", port=port)
+
 # app.py placeholder
