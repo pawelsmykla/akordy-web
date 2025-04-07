@@ -1,4 +1,3 @@
-
 from generator import uruchom_gui
 
 if __name__ == "__main__":
