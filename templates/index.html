@@ -2,76 +2,57 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Generator Akordów i Etiud</title>
+    <title>Generator Akordów Septymowych</title>
     <style>
         body { font-family: sans-serif; padding: 30px; background: #f7f7f7; }
         h1 { margin-bottom: 20px; }
-        form { margin-bottom: 40px; }
+        form { margin-bottom: 40px; background: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         input, select, button, textarea {
             padding: 10px;
-            margin: 5px 0;
+            margin: 10px 0;
             font-size: 1em;
             width: 100%;
-            max-width: 500px;
+            box-sizing: border-box;
         }
-        button {
-            cursor: pointer;
-        }
-        img {
-            max-width: 100%;
-            margin-top: 20px;
-            border: 1px solid #ccc;
-        }
-        .form-block {
-            background: #fff;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
+        img { max-width: 100%; border: 1px solid #ccc; margin-top: 20px; }
     </style>
 </head>
 <body>
     <h1>Generator Akordów Septymowych i Etiud</h1>
 
-    <!-- Formularz 1: wszystkie warianty -->
-    <div class="form-block">
-        <h2>1. Generuj wszystkie warianty akordu</h2>
-        <form method="POST" action="/">
-            <input type="hidden" name="form_type" value="warianty">
-            <label>Tonacja:
-                <input type="text" name="tonika" placeholder="np. F#" required>
-            </label>
-            <label>Rodzaj akordu:
-                <select name="typ">
-                    <option value="Durowy">Durowy (maj7)</option>
-                    <option value="Molowy">Molowy (m7)</option>
-                    <option value="Dominantowy">Dominantowy (7)</option>
-                    <option value="Półzmniejszony">Półzmniejszony (m7b5)</option>
-                </select>
-            </label>
-            <button type="submit">Generuj wszystkie warianty</button>
-        </form>
-    </div>
+    <!-- FORMULARZ 1: Wszystkie warianty -->
+    <form method="post">
+        <input type="hidden" name="form_type" value="warianty">
+        <h2>Warianty dla wybranego akordu</h2>
+        <label>Tonacja:
+            <input type="text" name="tonika" placeholder="np. F#" required>
+        </label>
+        <label>Rodzaj akordu:
+            <select name="typ">
+                <option value="Durowy">Durowy (maj7)</option>
+                <option value="Molowy">Molowy (m7)</option>
+                <option value="Dominantowy">Dominantowy (7)</option>
+                <option value="Półzmniejszony">Półzmniejszony (m7b5)</option>
+            </select>
+        </label>
+        <button type="submit">Generuj warianty</button>
+    </form>
 
-    <!-- Formularz 2: konkretne akordy ze struną -->
-    <div class="form-block">
-        <h2>2. Generuj konkretne akordy</h2>
-        <form method="POST" action="/">
-            <input type="hidden" name="form_type" value="konkretne">
-            <textarea name="akordy_konkretne" rows="3" placeholder="np. Amaj7 E, D7 A, Em7 A, Gm7b5 E" required></textarea>
-            <button type="submit">Generuj konkretne akordy</button>
-        </form>
-    </div>
+    <!-- FORMULARZ 2: Konkretne akordy -->
+    <form method="post">
+        <input type="hidden" name="form_type" value="konkretne">
+        <h2>Konkretne akordy i struny</h2>
+        <textarea name="akordy_konkretne" placeholder="Np. Amaj7 E, D7 A, Em7 A, Gm7b5 E" rows="3" required></textarea>
+        <button type="submit">Generuj konkretne akordy</button>
+    </form>
 
-    <!-- Formularz 3: akordy blisko siebie -->
-    <div class="form-block">
-        <h2>3. Generuj akordy blisko siebie</h2>
-        <form method="POST" action="/">
-            <input type="hidden" name="form_type" value="optymalne">
-            <textarea name="akordy_optymalne" rows="3" placeholder="np. Amaj7, D7, Em7, Gm7b5" required></textarea>
-            <button type="submit">Generuj optymalne akordy</button>
-        </form>
-    </div>
+    <!-- FORMULARZ 3: Optymalnie bliskie -->
+    <form method="post">
+        <input type="hidden" name="form_type" value="optymalne">
+        <h2>Optymalnie bliskie akordy (bez strun)</h2>
+        <textarea name="akordy_optymalne" placeholder="Np. Amaj7, D7, Em7, Gm7b5" rows="3" required></textarea>
+        <button type="submit">Generuj optymalne ułożenie</button>
+    </form>
 
     {% if obraz %}
         <h2>Wynik:</h2>
