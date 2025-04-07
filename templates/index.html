@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Generator Akordów Septymowych</title>
+    <style>
+        body { font-family: sans-serif; padding: 30px; background: #f7f7f7; }
+        h1 { margin-bottom: 20px; }
+        form { margin-bottom: 40px; }
+        input, select, button {
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 1em;
+        }
+        img { max-width: 100%; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>Generator Akordów Septymowych i Etiud</h1>
+    <form method="post">
+        <label>Tonacja:
+            <input type="text" name="tonika" placeholder="np. F#" required>
+        </label>
+        <label>Rodzaj akordu:
+            <select name="typ">
+                <option value="Durowy">Durowy (maj7)</option>
+                <option value="Molowy">Molowy (m7)</option>
+                <option value="Dominantowy">Dominantowy (7)</option>
+                <option value="Półzmniejszony">Półzmniejszony (m7b5)</option>
+            </select>
+        </label>
+        <button type="submit">Generuj</button>
+    </form>
+
+    {% if obraz %}
+        <h2>Wynik: {{ typ }} ({{ tonika }})</h2>
+        <img src="{{ url_for('static', filename=obraz.split('static/')[1]) }}" alt="Diagram akordu">
+    {% endif %}
+</body>
+</html>
