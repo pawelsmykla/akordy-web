@@ -1,8 +1,20 @@
+import sys
+import os
+
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS  # folder tymczasowy PyInstaller
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+
 from PIL import Image
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.patheffects as path_effects
-import os
 
 # --- KONFIGURACJA MAPOWANIA ---
 
@@ -21,11 +33,15 @@ struna_y = {
     'e': 98, 'B': 80, 'G': 63, 'D': 46, 'A': 29, 'E': 11
 }
 
+# --- MAPA STRUN I DźWIĘKÓW ---
+
 MAPA_STRUN = {}
 for struna, baza_dzwieku in zip(STRUNY, ['E', 'B', 'G', 'D', 'A', 'E']):
     idx = WSZYSTKIE_DZWIEKI.index(baza_dzwieku)
     dzwieki = [(prog, WSZYSTKIE_DZWIEKI[(idx + prog) % 12]) for prog in range(0, 25)]
     MAPA_STRUN[struna] = dzwieki
+
+# --- FUNKCJE POMOCNICZE ---
 
 def znajdz_na_strunie_blisko(struna, nuta, preferowane_progi):
     dostepne = [(prog, dzwiek) for prog, dzwiek in MAPA_STRUN[struna] if dzwiek == nuta]
@@ -33,20 +49,21 @@ def znajdz_na_strunie_blisko(struna, nuta, preferowane_progi):
         return None
     return min(dostepne, key=lambda x: min(abs(x[0] - p) for p in preferowane_progi))[0]
 
-def znajdz_na_strunie(struna, nuta):
+def znajdz_na_strunie(struna, nuta, minimalny_prog=0):
     for prog, dzwiek in MAPA_STRUN[struna]:
-        if dzwiek == nuta:
+        if dzwiek == nuta and prog >= minimalny_prog:
             return prog
     return None
 
+# --- BUDOWANIE AKORDU I ETIUDY ---
+
 def buduj_akord_sztywno(tonika, struna_bazowa, przewrot, typ):
     INTERWALY = {
-        'Durowy': {'tercja': 4, 'septyma': 11},
-        'Molowy': {'tercja': 3, 'septyma': 10},
-        'Dominantowy': {'tercja': 4, 'septyma': 10},
-        'Półzmniejszony': {'tercja': 3, 'septyma': 10}
+        'Durowy': {'tercja': 4, 'septyma': 11, 'kwinta': 7, 'sekunda': 2},
+        'Molowy': {'tercja': 3, 'septyma': 10, 'kwinta': 7, 'sekunda': 2},
+        'Dominantowy': {'tercja': 4, 'septyma': 10, 'kwinta': 7, 'sekunda': 2},
+        'Półzmniejszony': {'tercja': 3, 'septyma': 10, 'kwinta': 6, 'sekunda': 1}
     }
-
     tonika_idx = WSZYSTKIE_DZWIEKI.index(tonika)
     tercja = WSZYSTKIE_DZWIEKI[(tonika_idx + INTERWALY[typ]['tercja']) % 12]
     septyma = WSZYSTKIE_DZWIEKI[(tonika_idx + INTERWALY[typ]['septyma']) % 12]
@@ -60,15 +77,48 @@ def buduj_akord_sztywno(tonika, struna_bazowa, przewrot, typ):
         ('D', 2): {'D': tonika, 'G': tercja, 'B': septyma}
     }
 
+    problematyczne_wyjatki = {
+        ('E', 'E#'), ('E', 'F'),
+        ('A', 'A#'),
+        ('D', 'D#'),
+        ('D', 'C')
+    }
+
+    pryma_prog_min = 0
+    if przewrot == 2:
+        if tonika == struna_bazowa or (struna_bazowa, tonika) in problematyczne_wyjatki:
+            pryma_prog_min = 10
+
     akord = {}
+    pozycje_akordu = {}
+    prog_prymy = None
+
     for struna, nuta in struktura[(struna_bazowa, przewrot)].items():
-        prog = znajdz_na_strunie(struna, nuta)
-        interwal = 'pryma' if nuta == tonika else ('tercja' if nuta == tercja else 'septyma')
+        if nuta == tonika:
+            prog = znajdz_na_strunie(struna, nuta, minimalny_prog=pryma_prog_min)
+            prog_prymy = prog
+            interwal = 'pryma'
+        elif nuta == tercja:
+            if prog_prymy is not None:
+                preferowane = [prog_prymy + i for i in range(-1, 3)]
+                prog = znajdz_na_strunie_blisko(struna, nuta, preferowane)
+            else:
+                prog = znajdz_na_strunie(struna, nuta, minimalny_prog=pryma_prog_min)
+            interwal = 'tercja'
+        elif nuta == septyma:
+            if prog_prymy is not None:
+                preferowane = [prog_prymy + i for i in range(-1, 3)]
+                prog = znajdz_na_strunie_blisko(struna, nuta, preferowane)
+            else:
+                prog = znajdz_na_strunie(struna, nuta, minimalny_prog=pryma_prog_min)
+            interwal = 'septyma'
+
         akord[f"{struna}_{interwal}"] = (prog, nuta)
+        pozycje_akordu[interwal] = (struna, prog)
 
-    return akord, tercja, septyma, typ
+    return akord, tercja, septyma, typ, pryma_prog_min, pozycje_akordu
 
-def buduj_etiude_sztywno(tonika, tercja, septyma, struna, przewrot, typ):
+def buduj_etiude_sztywno(tonika, tercja, septyma, struna, przewrot, typ, pryma_prog_min=0, pozycje_akordu={}):
     INTERWALY = {
         'Durowy': {'kwinta': 7, 'sekunda': 2},
         'Molowy': {'kwinta': 7, 'sekunda': 2},
@@ -97,22 +147,21 @@ def buduj_etiude_sztywno(tonika, tercja, septyma, struna, przewrot, typ):
     for struna_doc, interwaly in struktury[(struna, przewrot)].items():
         for idx, interwal in enumerate(interwaly):
             nuta = skala[interwal]
-            if interwal in ['tercja', 'septyma']:
-                prog = znajdz_na_strunie(struna_doc, nuta)
+            if interwal in ['tercja', 'septyma'] and interwal in pozycje_akordu:
+                prog = pozycje_akordu[interwal][1]
             else:
-                poprzedni_interwal = interwaly[idx - 1]
-                poprzednia_nuta = skala[poprzedni_interwal]
-                poprzedni_prog = znajdz_na_strunie(struna_doc, poprzednia_nuta)
-                preferowane = [poprzedni_prog + 1, poprzedni_prog + 2, poprzedni_prog + 3]
+                poprzedni_interwal = interwaly[idx - 1] if idx > 0 else None
+                poprzedni_prog = pozycje_akordu.get(poprzedni_interwal, (None, None))[1] if poprzedni_interwal else None
+                preferowane = [poprzedni_prog + i for i in range(1, 4)] if poprzedni_prog is not None else list(range(pryma_prog_min, 25))
                 prog = znajdz_na_strunie_blisko(struna_doc, nuta, preferowane)
 
-            if prog:
+            if prog is not None:
                 etiuda[f"{struna_doc}_{interwal}"] = (prog, nuta)
 
     return etiuda
 
 def rysuj_diagram(ax, punkty, tytul):
-    img = Image.open("static/template_gryf.jpg")
+    img = Image.open(resource_path("template_gryf.jpg"))
     ax.imshow(img, extent=[0, img.width, 0, img.height])
     ax.set_title(tytul)
     ax.set_xlim(0, img.width)
@@ -140,22 +189,19 @@ def rysuj_diagram(ax, punkty, tytul):
         ax.text(x, y, nuta, ha='center', va='center', fontsize=10, color='white',
                 path_effects=[path_effects.withStroke(linewidth=1.2, foreground='black')])
 
+import matplotlib.pyplot as plt
 def generuj_wizualizacje(tonika, typ):
-    fig, axs = plt.subplots(6, 2, figsize=(16, 12))
+    fig, axs = plt.subplots(6, 2, figsize=(16, 10))
     pary = [('E', 1), ('E', 2), ('A', 1), ('A', 2), ('D', 1), ('D', 2)]
 
     for i, (struna, przewrot) in enumerate(pary):
-        akord, tercja, septyma, typ_akordu = buduj_akord_sztywno(tonika, struna, przewrot, typ)
-        etiuda = buduj_etiude_sztywno(tonika, tercja, septyma, struna, przewrot, typ_akordu)
+        akord, tercja, septyma, typ_akordu, pryma_prog_min, pozycje_akordu = buduj_akord_sztywno(tonika, struna, przewrot, typ)
+        etiuda = buduj_etiude_sztywno(tonika, tercja, septyma, struna, przewrot, typ_akordu, pryma_prog_min, pozycje_akordu)
         rysuj_diagram(axs[i, 0], akord, f"Akord {typ} ({tonika}) na strunie {struna} - przewrót {przewrot}")
         rysuj_diagram(axs[i, 1], etiuda, f"Etiuda dla akordu {typ} ({tonika}) na strunie {struna} - przewrót {przewrot}")
 
+    output_path = f"static/diagram_{tonika}_{typ}.png"
     plt.tight_layout()
-    output_path = f"static/output_{tonika}_{typ}.png"
     plt.savefig(output_path)
     plt.close()
     return output_path
-
-if __name__ == "__main__":
-    generuj_wizualizacje("F#", "Durowy")
-
