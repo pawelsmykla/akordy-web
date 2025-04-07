@@ -161,7 +161,7 @@ def buduj_etiude_sztywno(tonika, tercja, septyma, struna, przewrot, typ, pryma_p
     return etiuda
 
 def rysuj_diagram(ax, punkty, tytul):
-    img = Image.open(resource_path("template_gryf.jpg"))
+    img = Image.open(resource_path("static\template_gryf.jpg"))
     ax.imshow(img, extent=[0, img.width, 0, img.height])
     ax.set_title(tytul)
     ax.set_xlim(0, img.width)
