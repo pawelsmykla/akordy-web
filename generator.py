@@ -1,50 +1,52 @@
-import matplotlib.pyplot as plt
 import os
-from akordy_logika import buduj_akord_sztywno, buduj_etiude_sztywno, rysuj_diagram, rozbij_akordy_na_parametry, rozpoznaj_typ_akordu, znajdz_na_strunie
-
+import matplotlib.pyplot as plt
+from akordy_logika import (
+    buduj_akord_sztywno,
+    buduj_etiude_sztywno,
+    rysuj_diagram,
+    rozbij_akordy_na_parametry,
+    rozpoznaj_typ_akordu,
+    znajdz_na_strunie
+)
 
 def zapisz_wykres(fig):
-    output_path = os.path.join("static", "output.png")
+    sciezka = "static/wynik.png"
     fig.tight_layout(pad=1)
-    fig.savefig(output_path)
+    fig.savefig(sciezka, format='png')
     plt.close(fig)
-    return output_path
-
+    return sciezka
 
 def generuj_wszystkie_warianty(tonika, typ):
     pary = [('E', 1), ('E', 2), ('A', 1), ('A', 2), ('D', 1), ('D', 2)]
-    fig, axs = plt.subplots(len(pary), 2, figsize=(12, 12))
 
-    for i, (struna, przewrot) in enumerate(pary):
-        akord, tercja, septyma, typ_akordu, pryma_prog_min, pozycje_akordu = buduj_akord_sztywno(
-            tonika, struna, przewrot, typ
-        )
-        etiuda = buduj_etiude_sztywno(tonika, tercja, septyma, struna, przewrot, typ_akordu, pryma_prog_min, pozycje_akordu)
-        rysuj_diagram(axs[i][0], akord, f"Akord {typ} ({tonika}) na strunie {struna} - przewrót {przewrot}")
-        rysuj_diagram(axs[i][1], etiuda, f"Etiuda dla akordu {typ} ({tonika})")
+    fig, axs = plt.subplots(len(pary), 2, figsize=(16, len(pary) * 2.5))
+
+    for idx, (struna, przewrot) in enumerate(pary):
+        akord, tercja, septyma, typ_akordu, pryma_prog_min, pozycje = buduj_akord_sztywno(tonika, struna, przewrot, typ)
+        etiuda = buduj_etiude_sztywno(tonika, tercja, septyma, struna, przewrot, typ_akordu, pryma_prog_min, pozycje)
+
+        rysuj_diagram(axs[idx][0], akord, f"Akord {typ} ({tonika}) na strunie {struna} - przewrót {przewrot}")
+        rysuj_diagram(axs[idx][1], etiuda, f"Etiuda dla akordu {typ} ({tonika}) na strunie {struna} - przewrót {przewrot}")
 
     return zapisz_wykres(fig)
 
-
 def generuj_konkretne_akordy(ciag):
     akordy = rozbij_akordy_na_parametry(ciag)
-    fig, axs = plt.subplots(len(akordy)*2, 2, figsize=(12, len(akordy)*4))
+    fig, axs = plt.subplots(len(akordy), 2, figsize=(16, len(akordy) * 2.5))
 
-    row = 0
+    idx = 0
     for (tonika, typ, struna) in akordy:
         if struna not in ['E', 'A', 'D'] or typ is None:
             continue
         for przewrot in [1, 2]:
-            akord, tercja, septyma, typ_akordu, pryma_prog_min, pozycje_akordu = buduj_akord_sztywno(
-                tonika, struna, przewrot, typ
-            )
-            etiuda = buduj_etiude_sztywno(tonika, tercja, septyma, struna, przewrot, typ_akordu, pryma_prog_min, pozycje_akordu)
-            rysuj_diagram(axs[row][0], akord, f"Akord {typ} ({tonika}) na strunie {struna} - przewrót {przewrot}")
-            rysuj_diagram(axs[row][1], etiuda, f"Etiuda dla akordu {typ} ({tonika})")
-            row += 1
+            akord, tercja, septyma, typ_akordu, pryma_prog_min, pozycje = buduj_akord_sztywno(tonika, struna, przewrot, typ)
+            etiuda = buduj_etiude_sztywno(tonika, tercja, septyma, struna, przewrot, typ_akordu, pryma_prog_min, pozycje)
+
+            rysuj_diagram(axs[idx][0], akord, f"Akord {typ} ({tonika}) na strunie {struna} - przewrót {przewrot}")
+            rysuj_diagram(axs[idx][1], etiuda, f"Etiuda dla akordu {typ} ({tonika}) na strunie {struna} - przewrót {przewrot}")
+            idx += 1
 
     return zapisz_wykres(fig)
-
 
 def generuj_optymalne_akordy(ciag):
     akordy_wejsciowe = [a.strip() for a in ciag.split(",")]
@@ -77,17 +79,14 @@ def generuj_optymalne_akordy(ciag):
         wybrane_struny.append((tonika, typ_akordu, najlepsza_struna))
         ostatni_prog = najblizszy_prog
 
-    fig, axs = plt.subplots(len(wybrane_struny)*2, 2, figsize=(12, len(wybrane_struny)*4))
-    row = 0
+    fig, axs = plt.subplots(len(wybrane_struny), 2, figsize=(16, len(wybrane_struny) * 2.5))
 
-    for tonika, typ, struna in wybrane_struny:
+    for idx, (tonika, typ, struna) in enumerate(wybrane_struny):
         for przewrot in [1, 2]:
-            akord, tercja, septyma, typ_akordu, pryma_prog_min, pozycje_akordu = buduj_akord_sztywno(
-                tonika, struna, przewrot, typ
-            )
-            etiuda = buduj_etiude_sztywno(tonika, tercja, septyma, struna, przewrot, typ_akordu, pryma_prog_min, pozycje_akordu)
-            rysuj_diagram(axs[row][0], akord, f"Akord {typ} ({tonika}) na strunie {struna} - przewrót {przewrot}")
-            rysuj_diagram(axs[row][1], etiuda, f"Etiuda dla akordu {typ} ({tonika})")
-            row += 1
+            akord, tercja, septyma, typ_akordu, pryma_prog_min, pozycje = buduj_akord_sztywno(tonika, struna, przewrot, typ)
+            etiuda = buduj_etiude_sztywno(tonika, tercja, septyma, struna, przewrot, typ_akordu, pryma_prog_min, pozycje)
+
+            rysuj_diagram(axs[idx][0], akord, f"Akord {typ} ({tonika}) na strunie {struna} - przewrót {przewrot}")
+            rysuj_diagram(axs[idx][1], etiuda, f"Etiuda dla akordu {typ} ({tonika}) na strunie {struna} - przewrót {przewrot}")
 
     return zapisz_wykres(fig)
