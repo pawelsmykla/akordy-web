@@ -1,7 +1,7 @@
 services:
   - type: web
-    name: akordy-septymowe
+    name: akordy-web
     env: python
     plan: free
-    buildCommand: ""
-    startCommand: python app.py
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app.py"

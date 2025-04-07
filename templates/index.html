@@ -3,22 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Generator Akordów Septymowych</title>
-    <style>
-        body { font-family: sans-serif; padding: 30px; background: #f7f7f7; }
-        h1 { margin-bottom: 20px; }
-        form { margin-bottom: 40px; }
-        input, select, button {
-            padding: 10px;
-            margin: 5px 0;
-            font-size: 1em;
-        }
-        img { max-width: 100%; border: 1px solid #ccc; }
-    </style>
 </head>
 <body>
     <h1>Generator Akordów Septymowych i Etiud</h1>
 
-    <!-- Formularz 1: wszystkie warianty -->
     <form method="post">
         <input type="hidden" name="form_type" value="warianty">
         <label>Tonacja:
@@ -35,28 +23,24 @@
         <button type="submit">Generuj wszystkie warianty</button>
     </form>
 
-    <!-- Formularz 2: konkretne akordy i struny -->
     <form method="post">
         <input type="hidden" name="form_type" value="konkretne">
-        <label>Podaj konkretne akordy w poprawnej formie (Xmaj7, X7, Xm7, Xm7b5),
-        po kazdym akordzie podaj na której strunie ma być Tonika (E, A, D),
-        kolejny akord oddziel przecinkiem:</label>
-        <input type="text" name="akordy_konkretne" placeholder="np. Amaj7 E, D7 A, Em7 A, Gm7b5 E" required style="width: 100%">
+        <label>Akordy i struny:
+            <input type="text" name="akordy_konkretne" placeholder="np. Cmaj7 E, D7 A, ..." required>
+        </label>
         <button type="submit">Generuj konkretne akordy</button>
     </form>
 
-    <!-- Formularz 3: optymalne ułożenie akordów -->
     <form method="post">
         <input type="hidden" name="form_type" value="optymalne">
-        <label>Podaj konkretne akordy w poprawnej formie (Xmaj7, X7, Xm7, Xm7b5),
-        a spróbuję znaleźć dla nich warianty by były optymalnie blisko siebie.
-        Akordy oddziel przecinkami:</label>
-        <input type="text" name="akordy_optymalne" placeholder="np. Amaj7, D7, Em7, Gm7b5" required style="width: 100%">
+        <label>Akordy do optymalizacji:
+            <input type="text" name="akordy_optymalne" placeholder="np. Cmaj7, D7, ..." required>
+        </label>
         <button type="submit">Generuj optymalnie bliskie akordy</button>
     </form>
 
     {% if obraz %}
-        <h2>Wynik: {{ typ }} {{ tonika }}</h2>
+        <h2>Wynik</h2>
         <img src="{{ url_for('static', filename=obraz.split('static/')[1]) }}" alt="Diagram akordu">
     {% endif %}
 </body>
