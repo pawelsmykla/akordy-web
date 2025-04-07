@@ -186,7 +186,7 @@ def rysuj_diagram(ax, punkty, tytul):
         else:
             ax.add_patch(patches.Circle((x, y), size / 2, color=color))
 
-        ax.text(x, y, nuta, ha='center', va='center', fontsize=10, color='white',
+        ax.text(x, y, nuta, ha='center', va='center', fontsize=12, color='white',
                 path_effects=[path_effects.withStroke(linewidth=1.2, foreground='black')])
 
 import matplotlib.pyplot as plt
