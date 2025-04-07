@@ -1,3 +1,21 @@
+import sys
+import os
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS  # folder tymczasowy PyInstaller
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+from PIL import Image
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import matplotlib.patheffects as path_effects
+import tkinter as tk
+from tkinter import ttk, scrolledtext
+
 def uruchom_gui():
     root = tk.Tk()
     root.title("Generator Akordów i Etiud dla uczniów Szkoły Muzycznej Adama Fulary. by Paweł Smykla")
@@ -30,7 +48,9 @@ def uruchom_gui():
 
     tk.Button(root, text="Generuj wszystkie warianty", command=wygeneruj).pack(pady=10)
 
-    tk.Label(root, text="Podaj konkretne akordy w poprawnej formie (Xmaj7, X7, Xm7, Xm7b5), \npo kazdym akordzie podaj na ktorej strunie ma byc Tonika (E, A, D), \nkolejny akord oddziel przecinkiem (np Amaj7 E, D7 A, Em7 A, Gm7b5 E)").pack()
+    tk.Label(root, text="Podaj konkretne akordy w poprawnej formie (Xmaj7, X7, Xm7, Xm7b5), 
+po kazdym akordzie podaj na ktorej strunie ma byc Tonika (E, A, D), 
+kolejny akord oddziel przecinkiem (np Amaj7 E, D7 A, Em7 A, Gm7b5 E)").pack()
     custom_entry = tk.Entry(root, width=70)
     custom_entry.pack()
 
@@ -54,8 +74,9 @@ def uruchom_gui():
 
     tk.Button(root, text="Generuj konkretne akordy", command=wygeneruj_konkretne).pack(pady=10)
 
-    # --- TRZECIA FUNKCJONALNOŚĆ ---
-    tk.Label(root, text="Podaj konkretne akordy w poprawnej formie (Xmaj7, X7, Xm7, Xm7b5),\na spróbuję znaleźć dla nich warianty by były optymalnie blisko siebie.\nAkordy oddziel przecinkami.").pack(pady=10)
+    tk.Label(root, text="Podaj konkretne akordy w poprawnej formie (Xmaj7, X7, Xm7, Xm7b5),
+a spróbuję znaleźć dla nich warianty by były optymalnie blisko siebie.
+Akordy oddziel przecinkami.").pack(pady=10)
     custom_optimal_entry = tk.Entry(root, width=70)
     custom_optimal_entry.pack()
 
